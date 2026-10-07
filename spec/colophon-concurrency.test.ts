@@ -28,7 +28,10 @@ it("every one of many genuinely concurrent writes lands exactly once", async () 
   const responses = await Promise.all(markers.map((marker) => write(marker)));
   for (const res of responses) expect(res.status).toBe(303);
 
-  const text = await (await fetch(new URL("/", baseUrl))).text();
+  // Only the real list counts: the background ink drift repeats fragments.
+  const page = await (await fetch(new URL("/", baseUrl))).text();
+  const listAt = page.indexOf('<ol class="colophon-list"');
+  const text = page.slice(listAt, page.indexOf("</ol>", listAt));
   for (const marker of markers) {
     expect(text.split(marker).length - 1, `expected exactly one "${marker}"`).toBe(1);
   }

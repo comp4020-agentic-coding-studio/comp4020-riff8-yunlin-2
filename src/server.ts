@@ -8,6 +8,7 @@ import {
   findScroll,
   listColophons,
   listScrolls,
+  recentColophons,
   type Scroll,
 } from "./db.ts";
 import { DEFAULT_SLUG } from "./schema.ts";
@@ -69,6 +70,9 @@ async function readBody(req: import("node:http").IncomingMessage): Promise<strin
   return tooLarge ? undefined : Buffer.concat(chunks).toString("utf8");
 }
 
+// How many of a scroll's most recent colophons the background drift samples.
+const DRIFT_SAMPLE = 40;
+
 type Req = import("node:http").IncomingMessage;
 type Res = import("node:http").ServerResponse;
 
@@ -88,7 +92,7 @@ function notFound(res: Res): void {
 function showScroll(scroll: Scroll, url: URL, token: string, res: Res): void {
   const error = url.searchParams.get("error") ?? undefined;
   res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
-  res.end(renderScroll(scroll, listColophons(scroll.id), token, error));
+  res.end(renderScroll(scroll, listColophons(scroll.id), recentColophons(scroll.id, DRIFT_SAMPLE), token, error));
 }
 
 async function writeColophon(scroll: Scroll, req: Req, token: string, res: Res): Promise<void> {

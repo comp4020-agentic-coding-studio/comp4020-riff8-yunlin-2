@@ -82,8 +82,45 @@ function blankFigure(scroll: Scroll): string {
       </figure>`;
 }
 
+const FRAGMENT_LENGTH = 72;
+const DRIFT_ROWS = 3;
+
+// Display-only: the stored colophon is never touched. Cut on code points so a
+// fragment never ends in half a surrogate pair, and escaped after cutting so
+// an entity is never cut in half either.
+export function fragment(body: string): string {
+  const chars = [...body.replace(/\s+/g, " ").trim()];
+  const cut = chars.length > FRAGMENT_LENGTH ? `${chars.slice(0, FRAGMENT_LENGTH).join("").trimEnd()}…` : chars.join("");
+  return escapeHtml(cut);
+}
+
+// A slow drift of this scroll's own recent ink behind the page: decoration,
+// not a feed. Sampled once per load, hidden from assistive tech, untouched by
+// the live poll. Each row's fragments are repeated until the row is long
+// enough to fill a wide screen, then doubled so a -50% translate loops
+// seamlessly. An empty scroll gets no band at all.
+export function inkDrift(sample: Colophon[]): string {
+  if (sample.length === 0) return "";
+  const rows = Math.min(DRIFT_ROWS, sample.length);
+  const html = [];
+  for (let r = 0; r < rows; r++) {
+    const own = sample.filter((_, i) => i % rows === r).map((c) => fragment(c.body));
+    const filled = [...own];
+    while (filled.join("").length < 400 && own.join("").length > 0) filled.push(...own);
+    const spans = [...filled, ...filled].map((f) => `<span>${f}</span>`).join("");
+    html.push(`<div class="ink-drift-row" style="--drift: ${150 + r * 45}s">${spans}</div>`);
+  }
+  return `<div class="ink-drift" aria-hidden="true">${html.join("")}</div>`;
+}
+
 // The one place a scroll becomes a page, default included.
-export function renderScroll(scroll: Scroll, colophons: Colophon[], ownToken: string, error?: string): string {
+export function renderScroll(
+  scroll: Scroll,
+  colophons: Colophon[],
+  sample: Colophon[],
+  ownToken: string,
+  error?: string,
+): string {
   const isDefault = scroll.slug === DEFAULT_SLUG;
   const base = `/scroll/${encodeURIComponent(scroll.slug)}`;
   const errorMessage =
@@ -95,6 +132,7 @@ export function renderScroll(scroll: Scroll, colophons: Colophon[], ownToken: st
   const lastId = colophons.at(-1)?.id ?? 0;
 
   const body = `
+    ${inkDrift(sample)}
     <header class="site-header">
       ${isDefault ? "" : `<p class="site-name"><a href="/">Colophon</a></p>`}
       <h1>${isDefault ? "Colophon" : escapeHtml(scroll.title)}</h1>
