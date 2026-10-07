@@ -116,3 +116,11 @@ it("shows the sidebar of seals on this scroll, yours marked, only once the scrip
   expect(items[1]!.textContent).not.toContain("you");
   dom.window.close();
 });
+
+it("polls once straight away, so the sidebar doesn't wait a full tick to appear", async () => {
+  const path = await newScroll(`Prompt ${unique()}`);
+  const { dom, calls } = await openPage(path, await visitor());
+  await new Promise((r) => setTimeout(r, 300));
+  expect(calls).toHaveLength(1);
+  dom.window.close();
+});

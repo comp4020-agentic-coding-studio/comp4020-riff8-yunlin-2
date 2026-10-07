@@ -73,5 +73,5 @@
     setTimeout(poll, 900 + Math.random() * 200);
   }
 
-  setTimeout(poll, 900 + Math.random() * 200);
+  poll();
 })();
