@@ -1,10 +1,19 @@
 import { createServer } from "node:http";
 import { readFile, readFileSync } from "node:fs";
 import { extname } from "node:path";
-import { addColophon, createScroll, findScroll, listColophons, listScrolls, type Scroll } from "./db.ts";
+import {
+  addColophon,
+  colophonsSince,
+  createScroll,
+  findScroll,
+  listColophons,
+  listScrolls,
+  type Scroll,
+} from "./db.ts";
 import { DEFAULT_SLUG } from "./schema.ts";
 import { sealToken } from "./cookies.ts";
 import {
+  colophonEntry,
   renderLobby,
   renderNotFound,
   renderReadme,
@@ -95,6 +104,25 @@ async function writeColophon(scroll: Scroll, req: Req, token: string, res: Res):
   res.end();
 }
 
+// The one place a scroll's live feed is served. Each new colophon goes out
+// already rendered by colophonEntry, the same function the page itself uses,
+// so its body has been through escapeHtml and its "yours" marking is worked
+// out for the browser asking, exactly as on a first load.
+function liveFeed(scroll: Scroll, url: URL, token: string, res: Res): void {
+  const sinceParam = url.searchParams.get("since") ?? "0";
+  if (!/^\d{1,15}$/.test(sinceParam)) {
+    res.writeHead(400, { "Content-Type": "application/json; charset=utf-8" });
+    res.end(JSON.stringify({ error: "since must be a colophon id" }));
+    return;
+  }
+  const colophons = colophonsSince(scroll.id, Number(sinceParam)).map((c) => ({
+    id: c.id,
+    html: colophonEntry(c, token),
+  }));
+  res.writeHead(200, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" });
+  res.end(JSON.stringify({ colophons }));
+}
+
 // /scroll/<slug> and /scroll/<slug>/<rest>. A slug is only ever what slugify
 // produces, so anything outside [a-z0-9-] can't name a scroll.
 const SCROLL_ROUTE = /^\/scroll\/([a-z0-9-]+)(\/[a-z]+)?$/;
@@ -117,6 +145,7 @@ const server = createServer(async (req, res) => {
     const rest = route[2];
     if (req.method === "GET" && rest === undefined) return showScroll(scroll, url, token, res);
     if (req.method === "POST" && rest === "/colophons") return writeColophon(scroll, req, token, res);
+    if (req.method === "GET" && rest === "/live") return liveFeed(scroll, url, token, res);
     return notFound(res);
   }
 

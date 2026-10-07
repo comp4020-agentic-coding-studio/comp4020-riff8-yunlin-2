@@ -55,10 +55,13 @@ what has to change first, in the same commit.
   holds real rows from earlier schemas. Any schema change goes there, checked
   with `PRAGMA table_info` rather than trusting `CREATE TABLE IF NOT EXISTS`,
   with a `spec/migration.test.ts` case seeded in the previous shape.
-- Every colophon body is untrusted, persisted, and re-rendered as HTML to
-  every future visitor: it must always go through `escapeHtml` before it
-  reaches a template string. No new template may interpolate user text
-  unescaped.
+- Every colophon body and scroll title is untrusted, persisted, and
+  re-rendered as HTML to every future visitor: it must always go through
+  `escapeHtml` before it reaches a template string. No new template may
+  interpolate user text unescaped. The live feed sends colophons already
+  rendered by `colophonEntry`; the client only ever inserts that markup or
+  sets `textContent`, never builds HTML from raw strings, and there is no
+  second escaping routine anywhere.
 - The core interaction (reading the scroll, writing a colophon) must keep
   working with JavaScript disabled — a plain HTML form posting to the server.
   Anything that needs a script is a progressive enhancement on top, not a

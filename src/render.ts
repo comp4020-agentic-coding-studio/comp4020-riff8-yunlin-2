@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { escapeHtml } from "./html.ts";
 import { sealGlyph } from "./seal.ts";
 import type { Colophon, Scroll, ScrollSummary } from "./db.ts";
@@ -11,6 +12,10 @@ const dateFmt = new Intl.DateTimeFormat("en-AU", {
 });
 
 export const MAX_BODY_LENGTH = 320;
+
+// Read once at boot and inlined, so the page needs no second request and the
+// static route keeps serving only the extensions it already allows.
+const CLIENT_SCRIPT = readFileSync(new URL("./client.js", import.meta.url), "utf8");
 
 function layout(title: string, body: string): string {
   return `<!doctype html>
@@ -80,7 +85,6 @@ function blankFigure(scroll: Scroll): string {
 // The one place a scroll becomes a page, default included.
 export function renderScroll(scroll: Scroll, colophons: Colophon[], ownToken: string, error?: string): string {
   const isDefault = scroll.slug === DEFAULT_SLUG;
-  const path = scrollPath(scroll);
   const base = `/scroll/${encodeURIComponent(scroll.slug)}`;
   const errorMessage =
     error === "empty"
@@ -97,7 +101,7 @@ export function renderScroll(scroll: Scroll, colophons: Colophon[], ownToken: st
       <p class="kicker">${isDefault ? "a shared margin on one painting" : "a shared margin on an unmarked scroll"}</p>
       <p class="site-nav"><a href="/scrolls">all scrolls</a> · <a href="/readme/">what good means here</a></p>
     </header>
-    <main data-scroll="${escapeHtml(scroll.slug)}" data-path="${escapeHtml(path)}">
+    <main data-live="${base}/live">
       ${isDefault ? paintingFigure() : blankFigure(scroll)}
 
       <section aria-labelledby="colophons-heading">
@@ -132,6 +136,9 @@ export function renderScroll(scroll: Scroll, colophons: Colophon[], ownToken: st
       <p>Your seal is <strong>${sealGlyph(ownToken)}</strong> on every scroll — remembered by
         your browser, not by a name. <a href="/readme/">Read more.</a></p>
     </footer>
+    <script>
+${CLIENT_SCRIPT}
+    </script>
   `;
 
   return layout(isDefault ? "Colophon" : `${scroll.title} — Colophon`, body);
