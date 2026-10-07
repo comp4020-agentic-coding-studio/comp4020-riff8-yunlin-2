@@ -272,11 +272,67 @@ quotation marks is a stronger, more specific claim than a paraphrase, and
 needs the source's raw text checked directly, not just the general thrust
 of the argument.
 
-## What's next
+## Crit 9, in the pod's riff: many scrolls, live, and who is here
 
-Crit 9 asks for real-time (a colophon appearing in every open session
-within about a second) and one written decision about how the app behaves
-with several people writing at once. The schema here is already the
-smallest version that can carry both: adding a broadcast on write and
-picking what happens when two people submit close together are the two
-concrete next steps, not a redesign.
+This repo is a pod riff, so this entry follows the pod's `prompt.md` rather
+than the crit 9 brief alone. It asked for four things in order: many scrolls,
+live arrival within a scroll, a presence sidebar recorded as an ADR first,
+and a drift of past ink behind each scroll.
+
+### Why many scrolls were worth a schema change
+
+One scroll made "real-time" thin: everyone in a crit room on the same page
+is one conversation. Many scrolls make "here" mean something, which is what
+presence needs to be worth showing, and they let a visitor start an object
+rather than only add to one. The feature itself was small. The real cost was
+the migration ([`659a380`](https://github.com/comp4020-agentic-coding-studio/comp4020-riff8-yunlin-2/commit/659a380)): the Fly volume already holds
+colophons in a table with no `scroll_id`, and `CREATE TABLE IF NOT EXISTS`
+never adds a column to a table that exists. `migrate()` in `src/schema.ts`
+checks `PRAGMA table_info`, adds the column, inserts the Wang Yi scroll and
+backfills every NULL to it, inside one transaction, on every boot. A fresh
+database takes the same path (old table, then the same `ALTER`), so local
+runs exercise the production migration rather than a separate fresh-schema
+branch. Before writing the spec version, I checked it against a database
+written by the pre-scrolls code itself, run from a worktree of the previous
+commit: posted three colophons there, booted the new code over the file
+twice, and confirmed every row kept its id and order and landed in the
+default scroll. The built Docker image got the same test against a mounted
+legacy volume. One render function, one write handler and one live handler
+serve every scroll, with `/` and `POST /colophons` as the default slug
+filled in, so the existing spec files kept passing unchanged.
+
+### The presence decision
+
+The decision is recorded in `docs/decisions/0001-presence-sidebar.md`
+([`ff4bd7e`](https://github.com/comp4020-agentic-coding-studio/comp4020-riff8-yunlin-2/commit/ff4bd7e)), committed before the code that implements it
+([`2648f25`](https://github.com/comp4020-agentic-coding-studio/comp4020-riff8-yunlin-2/commit/2648f25)). Each scroll shows the seal glyphs of whoever has
+polled it in the last five seconds, one per visitor, per scroll. The
+rejected option given its strongest case is no presence at all: the closest
+reading of `README.md`'s "unhurried", the most private, and free. It lost
+because a scroll was historically read in company (雅集), and because
+without presence a live colophon arrives from a ghost rather than from one
+of the seals you can see. A bare count was rejected for turning the seal
+back into a metric. The costs accepted: a killed tab lingers up to the
+timeout, presence empties on restart, and per-scroll maps cost a little
+memory for no real gain at this scale. Presence rides the live poll
+([`36e612a`](https://github.com/comp4020-agentic-coding-studio/comp4020-riff8-yunlin-2/commit/36e612a)), so there is one request a second per tab and no
+second channel.
+
+### What playing it in a browser changed
+
+Four `agent-browser` sessions against the local server, three on one
+scroll and one on another, confirmed that colophons and seals only crossed
+between tabs on the same scroll, a closed tab's seal dropped off within the
+timeout, and the narrow viewport stacked the sidebar under the figure
+rather than over anything. Two visitors drew the same glyph, and both
+showed, as the ADR decided. Looking rather than testing also caught two
+things ([`4f54ce7`](https://github.com/comp4020-agentic-coding-studio/comp4020-riff8-yunlin-2/commit/4f54ce7)): the sidebar stayed hidden for the first
+second of every visit, waiting for a jittered tick, and the drift
+([`70204ab`](https://github.com/comp4020-agentic-coding-studio/comp4020-riff8-yunlin-2/commit/70204ab)) competed with the heading it passed behind. The
+first poll now fires on load, and the drift sits at 5.5% ink.
+
+This run was a pod run, which can't deploy or push: CI deploys the pod's
+app once the harness pushes. So the four-tab check ran against the local
+server and the spec ran against the same Docker image CI builds, not against
+`comp4020-riff8-yunlin-2.fly.dev`. The deployed check the prompt asks for is
+still to be done once CI has shipped this commit.

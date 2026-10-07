@@ -1,10 +1,15 @@
 # Colophon
 
-A handscroll painting stays open on the page. Under it, in the order they were
-written, sit the notes strangers have left in its margin — one line each, no
-account, no name, nothing that can be edited or deleted once it's there. It is
-alive the way a scroll is alive: everyone who has ever unrolled it left
-something behind, and the next person can still find it.
+Colophon holds scrolls. The first is a real one, Wang Yi's 1363 portrait of
+Yang Zhuxi, and it's what opens at `/`; anyone can start another from
+[the list of scrolls](/scrolls), which gives them a blank sheet under a title
+of their choosing. Under each scroll, in the order they were written, sit the
+notes strangers have left in its margin: one line each, no account, no name,
+nothing that can be edited or deleted once it's there, and no scroll renamed
+or taken down once started. A line written on a scroll appears within about a
+second for everyone else who has that scroll open, and a sidebar shows the
+seals of whoever is looking at it right now. Behind the page, fragments of
+the scroll's own past colophons drift slowly by.
 
 ## What good means here
 
@@ -17,6 +22,14 @@ calls this "a continuous dialogue" between the work and everyone who has since
 sat with it. That is the shape of multi-user, real-time and persistent I
 wanted: not a feed, but one object that a small, unhurried stream of people
 add to, permanently, leaving a trace the next visitor can actually find.
+
+Scrolls were also, often, read together. A scroll would be unrolled at a
+gathering of friends (雅集, an "elegant gathering"), and the seals at its end
+are partly a record of who was in the room. So when several people have the
+same scroll open at once, they see each other's seals arrive and leave, and
+see each other's lines land. Why presence is shown, and what the alternatives
+were, is recorded in
+[`docs/decisions/0001-presence-sidebar.md`](https://github.com/comp4020-agentic-coding-studio/comp4020-riff8-yunlin-2/blob/main/docs/decisions/0001-presence-sidebar.md).
 
 Three other things I read while deciding what small and good looks like here:
 
@@ -37,22 +50,31 @@ Three other things I read while deciding what small and good looks like here:
 
 ## What I chose not to build
 
-No accounts, avatars or profiles — a visitor is only the anonymous seal their
-browser is given on first visit, the same way a real seal marks presence
-without disclosing a name. No editing or deleting a colophon once it's
-written: ink doesn't come back off the paper, and a length limit (320
-characters) is the constraint that keeps a visitor considering a line rather
-than typing a paragraph. No likes, no replies, no threading, no feed of other
-people's activity, no notifications. Real-time and a place to write down one
-decision about several people at once both belong to the next two crits, not
-this one; this week is the smallest version of the object itself.
+No accounts, avatars or profiles: a visitor is only the anonymous seal their
+browser is given on first visit, the same glyph on every scroll, the way a
+real seal marks presence without disclosing a name. No editing or deleting a
+colophon once it's written, and no renaming or deleting a scroll: ink doesn't
+come back off the paper. A length limit (320 characters for a line, 80 for a
+scroll's title) keeps a visitor considering a line rather than typing a
+paragraph. No likes, no replies, no threading, no notifications, no count of
+visitors, no image uploads for new scrolls. The live sidebar shows who is
+here, not who has been; there's no "what's new since you left" view and no
+way to search or rank scrolls by activity.
+
+Everything live is a progressive enhancement. With JavaScript off, a scroll
+is still a server-rendered page and a form that posts to the server.
 
 ## What's enforced, what's judged
 
 `spec/` checks that a colophon written now is still there on the next
-request, that a visitor's own colophons are the ones marked as theirs (and
-nobody else's are), and that an empty or over-length line is rejected rather
-than silently corrupted. Whether the tone of what accumulates actually reads
-like a colophon — considered, brief, worth adding to a shared object — rather
-than chat is not something a test can check; that's for whoever reads the
-margin to judge.
+request, that it lands only in the scroll it was written in (on the page and
+in that scroll's live feed), that a visitor's own colophons are the ones
+marked as theirs, live or on load, and that an empty or over-length line or
+title is rejected rather than silently corrupted. It checks that a seal shows
+on a scroll's sidebar once it's looking, once however many tabs it has, drops
+off after a few quiet seconds, and never shows on a scroll it isn't looking
+at; and that the database from before scrolls existed migrates into the
+first scroll with every colophon intact and in order. Whether the tone of
+what accumulates actually reads like a colophon (considered, brief, worth
+adding to a shared object) rather than chat is not something a test can
+check; that's for whoever reads the margin to judge.
