@@ -42,10 +42,19 @@ what has to change first, in the same commit.
 - Never add an account, profile, avatar, name field, like, reply, thread or
   notification. A visitor is their seal (an anonymous per-browser token) and
   nothing else.
-- Never add a way to edit or delete a colophon after it's written, and never
-  auto-truncate one that's too long — reject it at the boundary and ask the
-  visitor to shorten it themselves. Silent mutation of what someone wrote is
-  worse than a rejected submission.
+- Never add a way to edit or delete a colophon after it's written, or to
+  rename or delete a scroll once started, and never auto-truncate what gets
+  stored — reject it at the boundary (320 characters for a colophon, 80 for a
+  scroll title) and ask the visitor to shorten it themselves. Silent mutation
+  of what someone wrote is worse than a rejected submission.
+- There is one place that renders a scroll (`renderScroll`), one that accepts
+  a colophon for it and one that serves its live feed. `/` and
+  `POST /colophons` are the default scroll's slug filled in, never a second
+  implementation.
+- `src/schema.ts`'s `migrate` runs on every boot against a Fly volume that
+  holds real rows from earlier schemas. Any schema change goes there, checked
+  with `PRAGMA table_info` rather than trusting `CREATE TABLE IF NOT EXISTS`,
+  with a `spec/migration.test.ts` case seeded in the previous shape.
 - Every colophon body is untrusted, persisted, and re-rendered as HTML to
   every future visitor: it must always go through `escapeHtml` before it
   reaches a template string. No new template may interpolate user text

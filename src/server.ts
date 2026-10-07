@@ -1,9 +1,18 @@
 import { createServer } from "node:http";
 import { readFile, readFileSync } from "node:fs";
 import { extname } from "node:path";
-import { addColophon, listColophons } from "./db.ts";
+import { addColophon, createScroll, findScroll, listColophons, listScrolls, type Scroll } from "./db.ts";
+import { DEFAULT_SLUG } from "./schema.ts";
 import { sealToken } from "./cookies.ts";
-import { renderIndex, renderReadme, MAX_BODY_LENGTH } from "./render.ts";
+import {
+  renderLobby,
+  renderNotFound,
+  renderReadme,
+  renderScroll,
+  scrollPath,
+  MAX_BODY_LENGTH,
+  MAX_TITLE_LENGTH,
+} from "./render.ts";
 import { renderMarkdown } from "./markdown.ts";
 
 const PORT = Number(process.env.PORT ?? 8080);
@@ -48,35 +57,86 @@ async function readBody(req: import("node:http").IncomingMessage): Promise<strin
   return tooLarge ? undefined : Buffer.concat(chunks).toString("utf8");
 }
 
+type Req = import("node:http").IncomingMessage;
+type Res = import("node:http").ServerResponse;
+
+function tooLarge(res: Res): void {
+  res.writeHead(413, { "Content-Type": "text/plain; charset=utf-8" });
+  res.end("payload too large");
+}
+
+function notFound(res: Res): void {
+  res.writeHead(404, { "Content-Type": "text/html; charset=utf-8" });
+  res.end(renderNotFound());
+}
+
+// The one handler that renders a scroll, and the one that accepts a colophon
+// for it. `/` and `POST /colophons` are the default scroll's slug filled in,
+// not second implementations.
+function showScroll(scroll: Scroll, url: URL, token: string, res: Res): void {
+  const error = url.searchParams.get("error") ?? undefined;
+  res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+  res.end(renderScroll(scroll, listColophons(scroll.id), token, error));
+}
+
+async function writeColophon(scroll: Scroll, req: Req, token: string, res: Res): Promise<void> {
+  const raw = await readBody(req);
+  if (raw === undefined) return tooLarge(res);
+  const body = (new URLSearchParams(raw).get("body") ?? "").trim();
+
+  let error: string | undefined;
+  if (body.length === 0) error = "empty";
+  else if (body.length > MAX_BODY_LENGTH) error = "long";
+
+  if (!error) addColophon(scroll.id, token, body);
+
+  const path = scrollPath(scroll);
+  res.writeHead(303, { Location: error ? `${path}?error=${error}` : path });
+  res.end();
+}
+
+// /scroll/<slug> and /scroll/<slug>/<rest>. A slug is only ever what slugify
+// produces, so anything outside [a-z0-9-] can't name a scroll.
+const SCROLL_ROUTE = /^\/scroll\/([a-z0-9-]+)(\/[a-z]+)?$/;
+
 const server = createServer(async (req, res) => {
   const url = new URL(req.url ?? "/", "http://internal");
   const { token, setCookie } = sealToken(req.headers.cookie);
   if (setCookie) res.setHeader("Set-Cookie", setCookie);
 
-  if (req.method === "GET" && url.pathname === "/") {
-    const error = url.searchParams.get("error");
+  if (url.pathname === "/" || url.pathname === "/colophons") {
+    const scroll = findScroll(DEFAULT_SLUG)!;
+    if (req.method === "GET" && url.pathname === "/") return showScroll(scroll, url, token, res);
+    if (req.method === "POST" && url.pathname === "/colophons") return writeColophon(scroll, req, token, res);
+  }
+
+  const route = url.pathname.match(SCROLL_ROUTE);
+  if (route) {
+    const scroll = findScroll(route[1]!);
+    if (!scroll) return notFound(res);
+    const rest = route[2];
+    if (req.method === "GET" && rest === undefined) return showScroll(scroll, url, token, res);
+    if (req.method === "POST" && rest === "/colophons") return writeColophon(scroll, req, token, res);
+    return notFound(res);
+  }
+
+  if (req.method === "GET" && url.pathname === "/scrolls") {
     res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
-    res.end(renderIndex(listColophons(), token, error ?? undefined));
+    res.end(renderLobby(listScrolls(), url.searchParams.get("error") ?? undefined));
     return;
   }
 
-  if (req.method === "POST" && url.pathname === "/colophons") {
+  if (req.method === "POST" && url.pathname === "/scrolls") {
     const raw = await readBody(req);
-    if (raw === undefined) {
-      res.writeHead(413, { "Content-Type": "text/plain; charset=utf-8" });
-      res.end("payload too large");
+    if (raw === undefined) return tooLarge(res);
+    const title = (new URLSearchParams(raw).get("title") ?? "").trim();
+    if (title.length === 0 || title.length > MAX_TITLE_LENGTH) {
+      res.writeHead(303, { Location: `/scrolls?error=${title.length === 0 ? "empty" : "long"}` });
+      res.end();
       return;
     }
-    const params = new URLSearchParams(raw);
-    const body = (params.get("body") ?? "").trim();
-
-    let error: string | undefined;
-    if (body.length === 0) error = "empty";
-    else if (body.length > MAX_BODY_LENGTH) error = "long";
-
-    if (!error) addColophon(token, body);
-
-    res.writeHead(303, { Location: error ? `/?error=${error}` : "/" });
+    const scroll = createScroll(title);
+    res.writeHead(303, { Location: scrollPath(scroll) });
     res.end();
     return;
   }

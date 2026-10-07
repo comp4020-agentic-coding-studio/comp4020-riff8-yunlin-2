@@ -18,3 +18,12 @@ it(".colophon-body can't be blown out sideways by an unbroken run of text", () =
   expect(match, "expected a .colophon-body rule in styles.css").toBeTruthy();
   expect(match![1]).toMatch(/overflow-wrap\s*:\s*anywhere/);
 });
+
+// A scroll's title is just as permanent (scrolls are never renamed) and is
+// rendered as the page's h1, so an unbroken 80-character title would do the
+// same thing to every visit of that scroll for good.
+it("a scroll title in the page heading can't blow the page out sideways either", () => {
+  const match = css.match(/\.site-header h1\s*\{([^}]*)\}/);
+  expect(match, "expected a .site-header h1 rule in styles.css").toBeTruthy();
+  expect(match![1]).toMatch(/overflow-wrap\s*:\s*anywhere/);
+});

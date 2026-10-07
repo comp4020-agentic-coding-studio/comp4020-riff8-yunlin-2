@@ -47,11 +47,21 @@ h2 {
 .site-header h1 {
   margin: 0;
   font-size: 1.9rem;
+  overflow-wrap: anywhere;
 }
 
 .site-header h1 a {
   color: inherit;
   text-decoration: none;
+}
+
+.site-name {
+  margin: 0 0 0.2rem;
+  font-size: 0.95rem;
+}
+
+.site-nav {
+  margin: 0;
 }
 
 .kicker {
@@ -77,6 +87,12 @@ h2 {
   height: 100%;
   width: auto;
   max-width: none;
+}
+
+.scroll-blank {
+  height: 9rem;
+  border: 1px solid var(--rule);
+  background: linear-gradient(to right, #e6dcc6, #efe7d6 6%, #efe7d6 94%, #e6dcc6);
 }
 
 figcaption {
@@ -139,6 +155,24 @@ figcaption {
   color: var(--seal);
 }
 
+.scroll-list {
+  padding-left: 1.4rem;
+}
+
+.scroll-list li {
+  padding: 0.3rem 0;
+  overflow-wrap: anywhere;
+}
+
+.scroll-count {
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
+.scroll-count::before {
+  content: " — ";
+}
+
 .empty-note {
   color: var(--ink-soft);
   font-style: italic;
@@ -154,6 +188,7 @@ label {
   font-size: 0.95rem;
 }
 
+input,
 textarea {
   font: inherit;
   font-size: 1rem;
