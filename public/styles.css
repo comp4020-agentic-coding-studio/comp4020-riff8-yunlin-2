@@ -70,6 +70,24 @@ h2 {
   font-style: italic;
 }
 
+main[data-live] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+main[data-live]:has(> .presence:not([hidden])) {
+  grid-template-columns: minmax(0, 1fr) 7rem;
+  column-gap: 2rem;
+}
+
+main[data-live] > * {
+  grid-column: 1;
+}
+
+main[data-live] > .scroll-frame {
+  grid-column: 1 / -1;
+}
+
 .scroll-frame {
   margin: 0 0 2rem;
 }
@@ -173,6 +191,55 @@ figcaption {
   content: " — ";
 }
 
+main[data-live] > .presence {
+  grid-column: 2;
+  grid-row: 2 / span 2;
+  align-self: start;
+  position: sticky;
+  top: 1rem;
+  padding-left: 1rem;
+  border-left: 1px solid var(--rule);
+}
+
+.presence-heading {
+  margin: 0 0 0.6rem;
+  font-size: 1rem;
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+.presence-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.presence-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.presence-seal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  font-size: 1.15rem;
+  color: var(--ink);
+  border: 1.5px solid var(--ink-soft);
+  border-radius: 3px;
+}
+
+.presence-you {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
 .empty-note {
   color: var(--ink-soft);
   font-style: italic;
@@ -236,6 +303,22 @@ footer {
   padding-left: 1rem;
   border-left: 3px solid var(--ink-soft);
   color: var(--ink-soft);
+}
+
+@media (width <= 40rem) {
+  main[data-live]:has(> .presence:not([hidden])) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  main[data-live] > .presence {
+    grid-column: 1;
+    grid-row: auto;
+    position: static;
+    margin: 0 0 1.5rem;
+    padding: 0 0 1rem;
+    border-left: 0;
+    border-bottom: 1px solid var(--rule);
+  }
 }
 
 @media (width <= 480px) {

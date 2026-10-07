@@ -104,6 +104,11 @@ export function renderScroll(scroll: Scroll, colophons: Colophon[], ownToken: st
     <main data-live="${base}/live">
       ${isDefault ? paintingFigure() : blankFigure(scroll)}
 
+      <aside class="presence" aria-label="Seals on this scroll now" hidden>
+        <h2 class="presence-heading">Here now</h2>
+        <ul class="presence-list"></ul>
+      </aside>
+
       <section aria-labelledby="colophons-heading">
         <h2 id="colophons-heading">Colophons</h2>
         <p class="section-note">

@@ -11,6 +11,8 @@ import {
   type Scroll,
 } from "./db.ts";
 import { DEFAULT_SLUG } from "./schema.ts";
+import { createPresence } from "./presence.ts";
+import { sealGlyph } from "./seal.ts";
 import { sealToken } from "./cookies.ts";
 import {
   colophonEntry,
@@ -26,6 +28,7 @@ import { renderMarkdown } from "./markdown.ts";
 
 const PORT = Number(process.env.PORT ?? 8080);
 const README = readFileSync("README.md", "utf8");
+const presence = createPresence(Number(process.env.PRESENCE_TIMEOUT_MS ?? 5000));
 
 const MIME: Record<string, string> = {
   ".avif": "image/avif",
@@ -107,7 +110,9 @@ async function writeColophon(scroll: Scroll, req: Req, token: string, res: Res):
 // The one place a scroll's live feed is served. Each new colophon goes out
 // already rendered by colophonEntry, the same function the page itself uses,
 // so its body has been through escapeHtml and its "yours" marking is worked
-// out for the browser asking, exactly as on a first load.
+// out for the browser asking, exactly as on a first load. Every poll is also
+// this seal's heartbeat on this scroll, and carries back who else is on it:
+// glyphs only, never tokens, one per visitor however many tabs they have.
 function liveFeed(scroll: Scroll, url: URL, token: string, res: Res): void {
   const sinceParam = url.searchParams.get("since") ?? "0";
   if (!/^\d{1,15}$/.test(sinceParam)) {
@@ -119,8 +124,10 @@ function liveFeed(scroll: Scroll, url: URL, token: string, res: Res): void {
     id: c.id,
     html: colophonEntry(c, token),
   }));
+  presence.beat(scroll.id, token);
+  const present = presence.present(scroll.id).map((t) => ({ glyph: sealGlyph(t), you: t === token }));
   res.writeHead(200, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" });
-  res.end(JSON.stringify({ colophons }));
+  res.end(JSON.stringify({ colophons, present }));
 }
 
 // /scroll/<slug> and /scroll/<slug>/<rest>. A slug is only ever what slugify

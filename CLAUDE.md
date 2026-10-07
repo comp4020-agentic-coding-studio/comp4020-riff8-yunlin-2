@@ -66,6 +66,9 @@ what has to change first, in the same commit.
   working with JavaScript disabled — a plain HTML form posting to the server.
   Anything that needs a script is a progressive enhancement on top, not a
   replacement.
+- Presence follows `docs/decisions/0001-presence-sidebar.md`: glyphs only
+  (never tokens, counts or names), per scroll, in memory, carried on the live
+  poll. Changing that means a new ADR first, not an edit to the code alone.
 - If the accent colour (`--seal`) gets a second meaning beyond "this colophon
   is yours," that's a sign the design has drifted, not a sign to add a second
   colour.

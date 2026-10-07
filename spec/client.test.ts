@@ -96,3 +96,23 @@ it("keeps polling after a failed poll instead of giving up", async () => {
   expect(calls.length).toBeGreaterThanOrEqual(3);
   dom.window.close();
 });
+
+it("shows the sidebar of seals on this scroll, yours marked, only once the script runs", async () => {
+  const path = await newScroll(`Sidebar ${unique()}`);
+  const reader = await visitor();
+  const other = await visitor();
+  await fetch(new URL(`${path}/live?since=0`, baseUrl), { headers: { Cookie: other } });
+
+  const { dom } = await openPage(path, reader);
+  const doc = dom.window.document;
+  const sidebar = doc.querySelector<HTMLElement>("aside.presence")!;
+  expect(sidebar.hidden).toBe(true);
+  expect(sidebar.getAttribute("aria-label")).toBeTruthy();
+
+  await until(() => doc.querySelectorAll(".presence-list li").length === 2);
+  expect(sidebar.hidden).toBe(false);
+  const items = [...doc.querySelectorAll(".presence-list li")];
+  expect(items[0]!.textContent).toContain("you");
+  expect(items[1]!.textContent).not.toContain("you");
+  dom.window.close();
+});
