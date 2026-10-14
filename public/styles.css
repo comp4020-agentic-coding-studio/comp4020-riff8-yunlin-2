@@ -1,9 +1,19 @@
 :root {
-  --paper: #f3ede1;
-  --ink: #2b2721;
-  --ink-soft: #6b6258;
-  --seal: #a8402c;
-  --rule: #d8cfbd;
+  --paper: #f7f3ea;
+  --paper-deep: #efe8da;
+  --field: #fbf8f2;
+  --ink: #24231f;
+  --ink-soft: #6b645a;
+  --rule: #d8d0c2;
+  --seal: #a3402d;
+  --serif:
+    "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", "URW Palladio L", P052, Georgia,
+    serif;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --cjk: "Songti SC", "STSong", "Noto Serif CJK TC", "Noto Serif CJK SC", "Source Han Serif", serif;
+  --gutter: clamp(1.25rem, 4.5vw, 6rem);
+  --page: 100rem;
+  --measure: 40rem;
 }
 
 * {
@@ -12,182 +22,313 @@
 
 html {
   background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 100%;
+  line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  margin: 0 auto;
-  max-width: 46rem;
-  padding: 1.5rem 1.25rem 4rem;
-  color: var(--ink);
-  font-family: Georgia, "Times New Roman", Times, serif;
-  line-height: 1.55;
+  margin: 0;
+  padding: 0 var(--gutter) 3rem;
+  overflow-x: clip;
 }
 
 a {
-  color: #1a4fa0;
+  color: var(--ink);
+  text-decoration-color: var(--rule);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
 }
 
-a:visited {
-  color: #5a3a91;
+a:hover {
+  text-decoration-color: currentcolor;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
 }
 
 h1,
 h2 {
   font-weight: normal;
-  line-height: 1.2;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
 }
 
-.ink-drift {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  overflow: hidden;
-  pointer-events: none;
-  user-select: none;
-  color: var(--ink);
-  opacity: 0.055;
-  font-size: 1.7rem;
+h2 {
+  margin: 0 0 0.75rem;
+  font-size: clamp(1.6rem, 1.2rem + 1.2vw, 2.25rem);
+}
+
+cite {
   font-style: italic;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
   white-space: nowrap;
 }
 
-.ink-drift-row {
+/* The masthead every page shares. */
+
+.site-bar,
+.site-header,
+main,
+.site-footer {
+  max-width: var(--page);
+  margin-inline: auto;
+}
+
+.site-bar {
   display: flex;
-  width: max-content;
-  animation: ink-drift var(--drift, 180s) linear infinite;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem 0 0.9rem;
+  border-bottom: 1px solid var(--rule);
 }
 
-.ink-drift-row span {
-  padding-right: 4rem;
+.wordmark {
+  font-size: 1.5rem;
+  text-decoration: none;
+  letter-spacing: -0.01em;
 }
 
-@keyframes ink-drift {
-  to {
-    transform: translateX(-50%);
-  }
+.site-bar nav {
+  display: flex;
+  gap: clamp(1.1rem, 3vw, 2.75rem);
+  font-family: var(--sans);
+  font-size: 0.95rem;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .ink-drift-row {
-    animation: none;
-  }
+.site-bar nav a {
+  padding-block: 0.6rem;
+  text-decoration: none;
+  color: var(--ink-soft);
+}
+
+.site-bar nav a:hover,
+.site-bar nav a[aria-current="page"] {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--ink);
 }
 
 .site-header {
-  border-bottom: 1px solid var(--rule);
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
+  padding: clamp(1.5rem, 4vw, 3.25rem) 0 clamp(1.25rem, 2.5vw, 2rem);
 }
 
 .site-header h1 {
   margin: 0;
-  font-size: 1.9rem;
+  font-size: clamp(2.6rem, 1.6rem + 3.6vw, 5rem);
+  line-height: 1;
+  letter-spacing: -0.025em;
   overflow-wrap: anywhere;
 }
 
-.site-header h1 a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.site-name {
-  margin: 0 0 0.2rem;
-  font-size: 0.95rem;
-}
-
-.site-nav {
-  margin: 0;
-}
-
-.kicker {
-  margin: 0.2rem 0 0.6rem;
+.subtitle {
+  margin: 0.5rem 0 0;
+  font-size: clamp(1.15rem, 1rem + 0.7vw, 1.65rem);
   color: var(--ink-soft);
-  font-style: italic;
 }
 
-main[data-live] {
+/* The scroll page: the scroll on top, then the margin and who is here. */
+
+.scroll-page {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-}
-
-main[data-live]:has(> .presence:not([hidden])) {
-  grid-template-columns: minmax(0, 1fr) 7rem;
-  column-gap: 2rem;
-}
-
-main[data-live] > * {
-  grid-column: 1;
-}
-
-main[data-live] > .scroll-frame {
-  grid-column: 1 / -1;
+  grid-template-areas:
+    "figure"
+    "presence"
+    "colophons"
+    "write";
 }
 
 .scroll-frame {
-  margin: 0 0 2rem;
+  grid-area: figure;
+  margin: 0 0 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.scroll-viewer {
+  padding: 0.5rem;
+  border: 1px solid var(--rule);
+  background: var(--field);
 }
 
 .scroll-scroller {
-  overflow-x: auto;
-  overflow-y: hidden;
-  height: 9rem;
-  border: 1px solid var(--rule);
-  background: #ece4d3;
+  height: clamp(13rem, 21vw, 27rem);
+  overflow: auto hidden;
+  overscroll-behavior-x: contain;
+  background: var(--paper-deep);
+  scrollbar-color: var(--rule) transparent;
+  scrollbar-width: thin;
 }
 
-.scroll-scroller img {
+.scroll-track {
+  display: flex;
+  width: max-content;
+  height: 100%;
+}
+
+.scroll-track img {
   display: block;
+  flex: none;
   height: 100%;
   width: auto;
   max-width: none;
 }
 
 .scroll-blank {
-  height: 9rem;
+  height: clamp(8rem, 14vw, 16rem);
   border: 1px solid var(--rule);
-  background: linear-gradient(to right, #e6dcc6, #efe7d6 6%, #efe7d6 94%, #e6dcc6);
+  background:
+    linear-gradient(to right, var(--paper-deep), transparent 3%, transparent 97%, var(--paper-deep)),
+    var(--field);
+}
+
+.scroll-controls {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+}
+
+/* At the painting's true proportions, so the window over it is exact. */
+.scroll-overview {
+  position: relative;
+  width: 100%;
+  max-width: 44rem;
+}
+
+.scroll-overview:has(> .scroll-overview-window:not([hidden])) {
+  cursor: pointer;
+}
+
+.scroll-overview img {
+  display: block;
+  width: 100%;
+  height: auto;
+  opacity: 0.85;
+}
+
+.scroll-overview-window {
+  position: absolute;
+  inset-block: 0;
+  border: 1.5px solid var(--ink);
+  pointer-events: none;
+}
+
+.scroll-hint {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.scroll-hint > span {
+  margin-right: 0.6rem;
+}
+
+.scroll-step {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  background: var(--field);
+  color: var(--ink);
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.scroll-step:hover:not(:disabled) {
+  border-color: var(--ink);
+  background: var(--field);
+}
+
+.scroll-step:disabled {
+  color: var(--rule);
+  cursor: default;
 }
 
 figcaption {
-  margin-top: 0.5rem;
+  display: grid;
+  gap: 0.2rem;
+  margin-top: 0.9rem;
+}
+
+.caption-title {
+  font-size: clamp(1.05rem, 0.95rem + 0.4vw, 1.3rem);
+}
+
+.caption-note {
+  font-family: var(--sans);
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+  max-width: var(--measure);
+}
+
+.section-note,
+.empty-note {
+  margin: 0 0 1rem;
+  font-family: var(--sans);
   font-size: 0.9rem;
   color: var(--ink-soft);
 }
 
-.section-note {
-  color: var(--ink-soft);
-  font-size: 0.95rem;
+.empty-note {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  font-style: italic;
+}
+
+.colophons {
+  grid-area: colophons;
+  margin-bottom: 2.5rem;
 }
 
 .colophon-list {
   list-style: none;
   margin: 0;
   padding: 0;
+  max-width: var(--measure);
+  border-top: 1px solid var(--rule);
 }
 
 .colophon {
   display: grid;
-  grid-template-columns: 2.4rem 1fr;
-  gap: 0 0.9rem;
-  padding: 0.9rem 0;
+  grid-template-columns: 2.75rem minmax(0, 1fr);
+  gap: 0 1.1rem;
+  padding: 1.1rem 0;
   border-bottom: 1px solid var(--rule);
 }
 
 .colophon-seal {
   grid-row: span 2;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  font-size: 1.3rem;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  font-family: var(--cjk);
+  font-size: 1.35rem;
+  line-height: 1;
   color: var(--ink-soft);
-  border: 1.5px solid var(--ink-soft);
-  border-radius: 3px;
-  height: 2.2rem;
-  width: 2.2rem;
-  align-self: start;
+  border: 1.5px solid var(--rule);
+  border-radius: 2px;
 }
 
 .colophon--mine .colophon-seal {
@@ -196,14 +337,17 @@ figcaption {
 }
 
 .colophon-body {
-  margin: 0 0 0.3rem;
+  margin: 0 0 0.25rem;
+  font-size: 1.125rem;
+  line-height: 1.55;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 
 .colophon-date {
   margin: 0;
-  font-size: 0.85rem;
+  font-family: var(--sans);
+  font-size: 0.8rem;
   color: var(--ink-soft);
 }
 
@@ -211,39 +355,19 @@ figcaption {
   color: var(--seal);
 }
 
-.scroll-list {
-  padding-left: 1.4rem;
-}
+/* Who is on this scroll now: a row of seals under the caption on a phone, a
+   column beside the margin on a wide screen. In ink, never the seal colour. */
 
-.scroll-list li {
-  padding: 0.3rem 0;
-  overflow-wrap: anywhere;
-}
-
-.scroll-count {
-  color: var(--ink-soft);
-  font-size: 0.9rem;
-}
-
-.scroll-count::before {
-  content: " — ";
-}
-
-main[data-live] > .presence {
-  grid-column: 2;
-  grid-row: 2 / span 2;
-  align-self: start;
-  position: sticky;
-  top: 1rem;
-  padding-left: 1rem;
-  border-left: 1px solid var(--rule);
+.presence {
+  grid-area: presence;
+  margin: 0 0 1.75rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--rule);
 }
 
 .presence-heading {
-  margin: 0 0 0.6rem;
-  font-size: 1rem;
-  color: var(--ink-soft);
-  font-style: italic;
+  margin: 0 0 0.75rem;
+  font-size: 1.25rem;
 }
 
 .presence-list {
@@ -252,63 +376,87 @@ main[data-live] > .presence {
   padding: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.75rem 1.1rem;
 }
 
 .presence-list li {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
+  display: grid;
+  justify-items: center;
+  gap: 0.2rem;
 }
 
 .presence-seal {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  font-size: 1.15rem;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  font-family: var(--cjk);
+  font-size: 1.35rem;
+  line-height: 1;
+  color: var(--ink-soft);
+  border: 1.5px solid var(--rule);
+  border-radius: 2px;
+}
+
+.presence-list li:has(.presence-you) .presence-seal {
   color: var(--ink);
-  border: 1.5px solid var(--ink-soft);
-  border-radius: 3px;
+  border-color: var(--ink);
 }
 
 .presence-you {
-  font-size: 0.85rem;
+  font-family: var(--sans);
+  font-size: 0.75rem;
   color: var(--ink-soft);
 }
 
-.empty-note {
-  color: var(--ink-soft);
-  font-style: italic;
+/* Forms: one restrained section, permanence stated before the button. */
+
+.write {
+  max-width: var(--measure);
+}
+
+.scroll-page > .write {
+  grid-area: write;
 }
 
 form {
   display: grid;
   gap: 0.6rem;
-  max-width: 32rem;
 }
 
 label {
-  font-size: 0.95rem;
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  color: var(--ink-soft);
 }
 
 input,
 textarea {
+  width: 100%;
   font: inherit;
-  font-size: 1rem;
-  padding: 0.6rem;
+  font-size: 1.0625rem;
+  padding: 0.75rem 0.85rem;
   border: 1px solid var(--ink-soft);
-  background: #fbf8f2;
+  border-radius: 0;
+  background: var(--field);
   color: var(--ink);
   resize: vertical;
 }
 
+.form-note {
+  margin: 0 0 0.4rem;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
 button {
-  font: inherit;
+  font-family: var(--sans);
   font-size: 1rem;
-  padding: 0.5rem 1.1rem;
+  padding: 0.8rem 1.6rem;
+  min-height: 2.75rem;
   border: 1px solid var(--ink);
+  border-radius: 0;
   background: var(--ink);
   color: var(--paper);
   width: fit-content;
@@ -316,55 +464,197 @@ button {
 }
 
 button:hover {
-  background: #46403a;
+  background: #3d3a33;
 }
 
 .form-error {
-  color: var(--ink);
-  font-weight: bold;
+  margin: 0 0 0.75rem;
+  padding-left: 0.75rem;
+  border-left: 3px solid var(--ink);
+  font-family: var(--sans);
+  font-weight: 600;
 }
 
-footer {
-  margin-top: 3rem;
-  padding-top: 1rem;
+/* The scroll directory. */
+
+.lobby {
+  display: grid;
+  gap: 3.5rem;
+}
+
+.scroll-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: 56rem;
   border-top: 1px solid var(--rule);
+}
+
+.scroll-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 2rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--rule);
+  overflow-wrap: anywhere;
+}
+
+.scroll-list a {
+  font-size: clamp(1.2rem, 1.05rem + 0.5vw, 1.5rem);
+  text-decoration: none;
+}
+
+.scroll-list a:hover {
+  text-decoration: underline;
+}
+
+.scroll-meta {
+  font-family: var(--sans);
+  font-size: 0.85rem;
   color: var(--ink-soft);
-  font-size: 0.9rem;
+}
+
+/* The README, as an article. */
+
+.prose > * {
+  max-width: var(--measure);
+}
+
+.prose {
+  padding-top: clamp(1.5rem, 4vw, 3.25rem);
+  font-size: 1.125rem;
+}
+
+.prose h1 {
+  margin: 0 0 1.5rem;
+  font-size: clamp(2.6rem, 1.6rem + 3.6vw, 5rem);
+  line-height: 1;
+  letter-spacing: -0.025em;
 }
 
 .prose h2 {
-  margin-top: 2rem;
+  margin-top: 2.5rem;
 }
 
 .prose blockquote {
-  margin: 0;
-  padding-left: 1rem;
-  border-left: 3px solid var(--ink-soft);
+  margin: 1.5rem 0;
+  padding-left: 1.25rem;
+  border-left: 2px solid var(--rule);
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+.prose code {
+  font-size: 0.9em;
+}
+
+.prose li + li {
+  margin-top: 0.6rem;
+}
+
+.site-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem 2rem;
+  margin-top: 4rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--rule);
+  font-family: var(--sans);
+  font-size: 0.85rem;
   color: var(--ink-soft);
 }
 
-@media (width <= 40rem) {
-  main[data-live]:has(> .presence:not([hidden])) {
-    grid-template-columns: minmax(0, 1fr);
+.site-footer p {
+  margin: 0;
+}
+
+.site-footer a {
+  color: var(--ink-soft);
+}
+
+.footer-seal {
+  font-family: var(--cjk);
+  font-size: 1.1rem;
+  color: var(--ink);
+}
+
+@media (width >= 62rem) {
+  .scroll-page {
+    grid-template-columns: minmax(0, var(--measure)) minmax(14rem, 1fr);
+    grid-template-areas:
+      "figure figure"
+      "colophons presence"
+      "write presence";
+    column-gap: clamp(3rem, 6vw, 8rem);
   }
 
-  main[data-live] > .presence {
-    grid-column: 1;
-    grid-row: auto;
-    position: static;
-    margin: 0 0 1.5rem;
-    padding: 0 0 1rem;
-    border-left: 0;
-    border-bottom: 1px solid var(--rule);
+  .scroll-frame {
+    margin-bottom: 2.5rem;
+    padding-bottom: 2rem;
+  }
+
+  .scroll-controls {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 2rem;
+  }
+
+  .presence {
+    align-self: start;
+    position: sticky;
+    top: 1.5rem;
+    margin: 0;
+    padding: 0 0 0 clamp(1.5rem, 3vw, 3rem);
+    border-bottom: 0;
+    border-left: 1px solid var(--rule);
+  }
+
+  .presence-heading {
+    font-size: clamp(1.6rem, 1.2rem + 1.2vw, 2.25rem);
+    margin-bottom: 1.25rem;
+  }
+
+  .colophons {
+    margin-bottom: 3.5rem;
   }
 }
 
-@media (width <= 480px) {
-  body {
-    padding: 1rem 0.9rem 3rem;
+@media (width <= 40rem) {
+  .scroll-viewer {
+    margin-inline: calc(-1 * var(--gutter));
+    padding: 0;
+    border-inline: 0;
+  }
+
+  .scroll-hint {
+    justify-content: space-between;
+  }
+
+  .scroll-hint > span {
+    margin-right: auto;
   }
 
   .colophon {
-    grid-template-columns: 2rem 1fr;
+    grid-template-columns: 2.25rem minmax(0, 1fr);
+    gap: 0 0.85rem;
+  }
+
+  .colophon-seal {
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 1.2rem;
+  }
+
+  .write button {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .scroll-scroller {
+    scroll-behavior: smooth;
   }
 }

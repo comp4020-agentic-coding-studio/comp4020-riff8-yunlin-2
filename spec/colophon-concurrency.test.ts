@@ -28,7 +28,7 @@ it("every one of many genuinely concurrent writes lands exactly once", async () 
   const responses = await Promise.all(markers.map((marker) => write(marker)));
   for (const res of responses) expect(res.status).toBe(303);
 
-  // Only the real list counts: the background ink drift repeats fragments.
+  // Only the real list counts.
   const page = await (await fetch(new URL("/", baseUrl))).text();
   const listAt = page.indexOf('<ol class="colophon-list"');
   const text = page.slice(listAt, page.indexOf("</ol>", listAt));

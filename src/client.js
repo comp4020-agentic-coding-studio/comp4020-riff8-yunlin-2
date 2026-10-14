@@ -4,6 +4,57 @@
 // reload, and the sidebar shows whose seals are on this scroll right now.
 // Polls the scroll's one live endpoint about once a second; each poll is
 // also this visitor's heartbeat there.
+
+// The painting viewer: open on the figure itself rather than the far end of
+// the colophons, keep the overview strip's window over the part actually in
+// view, and let the step buttons and a click on the strip move it. Without
+// this the scroller is still a plain horizontal scroll.
+(() => {
+  const scroller = document.querySelector(".scroll-scroller");
+  const overview = document.querySelector(".scroll-overview");
+  const view = overview?.querySelector(".scroll-overview-window");
+  if (!scroller || !overview || !view) return;
+  const steps = document.querySelectorAll(".scroll-step");
+
+  function update() {
+    const { scrollLeft, scrollWidth, clientWidth } = scroller;
+    if (scrollWidth === 0) return;
+    view.hidden = false;
+    view.style.left = `${(scrollLeft / scrollWidth) * 100}%`;
+    view.style.width = `${(clientWidth / scrollWidth) * 100}%`;
+    const max = scrollWidth - clientWidth;
+    for (const step of steps) {
+      step.hidden = false;
+      step.disabled = step.dataset.step === "-1" ? scrollLeft <= 1 : scrollLeft >= max - 1;
+    }
+  }
+
+  function centreOn(fraction, behavior) {
+    scroller.scrollTo({ left: fraction * scroller.scrollWidth - scroller.clientWidth / 2, behavior });
+  }
+
+  for (const step of steps) {
+    step.addEventListener("click", () => {
+      scroller.scrollBy({ left: Number(step.dataset.step) * scroller.clientWidth * 0.8 });
+    });
+  }
+  overview.addEventListener("click", (event) => {
+    const box = overview.getBoundingClientRect();
+    centreOn((event.clientX - box.left) / box.width);
+  });
+  scroller.addEventListener("scroll", update, { passive: true });
+  new ResizeObserver(update).observe(scroller);
+
+  // Images may still be loading, so the track's width settles late: open on
+  // the figure once all three tiles have their size.
+  const start = Number(scroller.dataset.start);
+  const tiles = [...scroller.querySelectorAll("img")];
+  Promise.all(tiles.map((img) => img.decode().catch(() => {}))).then(() => {
+    if (scroller.scrollLeft === 0 && start) centreOn(start, "instant");
+    update();
+  });
+})();
+
 (() => {
   const main = document.querySelector("main[data-live]");
   const list = document.querySelector(".colophon-list");

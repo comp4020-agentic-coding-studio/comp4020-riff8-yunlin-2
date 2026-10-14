@@ -60,8 +60,7 @@ what has to change first, in the same commit.
   `escapeHtml` before it reaches a template string. No new template may
   interpolate user text unescaped. The live feed sends colophons already
   rendered by `colophonEntry`; the client only ever inserts that markup or
-  sets `textContent`, never builds HTML from raw strings. The background ink
-  drift cuts fragments for display only and escapes them after cutting.
+  sets `textContent`, never builds HTML from raw strings.
   There is no second escaping routine anywhere.
 - The core interaction (reading the scroll, writing a colophon) must keep
   working with JavaScript disabled — a plain HTML form posting to the server.

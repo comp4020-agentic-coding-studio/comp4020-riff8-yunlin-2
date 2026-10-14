@@ -63,8 +63,6 @@ it("an over-length colophon is rejected rather than truncated", async () => {
 // unrelated "yours" text elsewhere on the page (the compose heading, say)
 // can't pass this test by accident.
 function entryFor(page: string, marker: string): string {
-  // The real list only: the background ink drift repeats fragments of the
-  // same words, outside any <li>.
   const listAt = page.indexOf('<ol class="colophon-list"');
   const text = page.slice(listAt);
   const at = text.indexOf(marker);

@@ -45,7 +45,6 @@ const selectScrolls = db.prepare(`
 const insertScroll = db.prepare("INSERT INTO scrolls (slug, title, created_at) VALUES (?, ?, ?)");
 const selectColophons = db.prepare("SELECT * FROM colophons WHERE scroll_id = ? ORDER BY id ASC");
 const selectSince = db.prepare("SELECT * FROM colophons WHERE scroll_id = ? AND id > ? ORDER BY id ASC LIMIT ?");
-const selectRecent = db.prepare("SELECT * FROM colophons WHERE scroll_id = ? ORDER BY id DESC LIMIT ?");
 const insertColophon = db.prepare("INSERT INTO colophons (scroll_id, token, body, created_at) VALUES (?, ?, ?, ?)");
 
 export function findScroll(slug: string): Scroll | undefined {
@@ -86,10 +85,6 @@ export function listColophons(scrollId: number): Colophon[] {
 
 export function colophonsSince(scrollId: number, since: number): Colophon[] {
   return selectSince.all(scrollId, since, LIVE_BATCH) as unknown as Colophon[];
-}
-
-export function recentColophons(scrollId: number, limit: number): Colophon[] {
-  return selectRecent.all(scrollId, limit) as unknown as Colophon[];
 }
 
 export function addColophon(scrollId: number, token: string, body: string): void {

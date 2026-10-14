@@ -8,8 +8,7 @@ notes strangers have left in its margin: one line each, no account, no name,
 nothing that can be edited or deleted once it's there, and no scroll renamed
 or taken down once started. A line written on a scroll appears within about a
 second for everyone else who has that scroll open, and a sidebar shows the
-seals of whoever is looking at it right now. Behind the page, fragments of
-the scroll's own past colophons drift slowly by.
+seals of whoever is looking at it right now.
 
 ## What good means here
 
